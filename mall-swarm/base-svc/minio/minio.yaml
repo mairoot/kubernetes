@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    k8s.kuboard.cn/name: minio
+  name: minio
+spec:
+  ports:
+    - nodePort: 30009
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+      name: console-port
+    - nodePort: 30019
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+      name: api-port
+  selector:
+    app: minio
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          env:
+          - name: MINIO_ROOT_USER
+            value: 'admin'
+          - name: MINIO_ROOT_PASSWORD
+            value: '123456'
+          image: quay.io/minio/minio:latest
+          command:
+          - /bin/bash
+          - -c
+          args: 
+          - minio server /data --console-address :9090
+          ports:
+            - containerPort: 9090
+              name: console-port
+            - containerPort: 9000
+              name: api-port
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2048Mi
+            requests:
+              cpu: 1000m
+              memory: 1024Mi
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-claim

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-cm
+data:
+  redis.conf: |-
+    bind 0.0.0.0
+    protected-mode yes
+    port 6379
+    #daemonize yes
+    loglevel notice
+    #logfile "/data/redis.log"
+    dir "/data"
+    slave-read-only yes
+    requirepass 123456
+    maxmemory-policy allkeys-lru
+    appendonly yes
+    appendfilename "appendonly.aof"
+    maxmemory 1gb
+    maxmemory-policy volatile-lru

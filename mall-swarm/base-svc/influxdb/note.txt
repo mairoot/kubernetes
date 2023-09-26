@@ -1,0 +1,4 @@
+开启认证
+kubectl exec -it influxdb-df6c79c4c-g42wp influx
+CREATE USER admin WITH PASSWORD '123456' WITH ALL PRIVILEGES;
+create database jmeter;

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-cm
+data:
+  kibana.yml: |-
+    server.port: 5601
+    server.host: "0.0.0.0"
+    server.name: "kkk"
+    elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+    elasticsearch.username: "elastic"
+    elasticsearch.password: "123456"
+    xpack.security.encryptionKey: "something_at_least_32_characters"
+    xpack.monitoring.ui.container.elasticsearch.enabled: true
+    i18n.locale: "zh-CN"

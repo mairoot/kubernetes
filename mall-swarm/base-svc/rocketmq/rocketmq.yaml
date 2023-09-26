@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    k8s.kuboard.cn/name: rocketmq
+  name: rocketmq
+spec:
+  ports:
+    - nodePort: 30012
+      port: 9876
+      protocol: TCP
+      targetPort: 9876
+  selector:
+    app: rocketmq
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocketmq
+  labels:
+    app: rocketmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq
+  template:
+    metadata:
+      labels:
+        app: rocketmq
+    spec:
+      containers:
+        - name: rocketmq
+          image: apache/rocketmq:4.9.7
+          command:
+            - "sh"
+            - "-c"
+            - "$ROCKETMQ_HOME/bin/mqnamesrv"
+          env:
+          - name: JAVA_OPT
+            value: "-Xms512m -Xmx512m"
+          ports:
+            - containerPort: 9876
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2048Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: rocketmq-data
+              mountPath: /home/rocketmq/store
+            - name: rocketmq-logs
+              mountPath: /home/rocketmq/logs
+            - name: rocketmq-config
+              mountPath: /home/rocketmq/broker.conf
+              subPath: broker.conf
+      volumes:
+        - name: rocketmq-data
+          persistentVolumeClaim:
+            claimName: rocketmq-claim
+        - name: rocketmq-logs
+          persistentVolumeClaim:
+            claimName: rocketmq-logs-claim
+        - name: rocketmq-config
+          configMap:
+            name: rocketmq-cm

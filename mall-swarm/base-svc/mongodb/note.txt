@@ -1,0 +1,6 @@
+0.进入配置用户
+kubectl exec -it mongodb-0 mongo
+use admin
+db.createUser({user:"admin",pwd:"123456",roles:[{role:"root",db:"admin"}]})
+db.auth("admin", "123456")
+show users;

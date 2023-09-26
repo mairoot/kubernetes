@@ -1,0 +1,28 @@
+# 设置密码步骤（首先操作）
+
+# 运行容器生成证书
+参照：https://github.com/elastic/helm-charts/blob/main/elasticsearch/examples/security/Makefile#L24-L35
+docker run --name elastic-charts-certs -itd -w /app elasticsearch:7.14.0 /bin/sh -c  \
+  "elasticsearch-certutil ca --out /app/elastic-stack-ca.p12 --pass '' && \
+    elasticsearch-certutil cert --name security-master --dns \
+    security-master --ca /app/elastic-stack-ca.p12 --pass '' --ca-pass '' --out /app/elastic-certificates.p12"
+
+# 从容器中将生成的证书拷贝出来
+docker cp elastic-charts-certs:/app/elastic-certificates.p12 ./ 
+
+# 删除容器
+docker rm -f elastic-charts-certs
+
+# 将 pcks12 中的信息分离出来，写入文件
+openssl pkcs12 -nodes -passin pass:'' -in elastic-certificates.p12 -out elastic-certificate.pem
+
+# 添加证书
+kubectl create secret generic es-ca-secret --from-file=elastic-certificates.p12
+kubectl create secret generic es-ca-pem-secret --from-file=elastic-certificate.pem
+
+# 设置集群用户名密码，用户名不建议修改
+kubectl create secret generic es-cd-secret \
+  --from-literal=username=elastic --from-literal=password=123456
+
+# 安装插件
+将插件(如ik)放到共享存储上面，然后重启ES。

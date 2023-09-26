@@ -1,0 +1,142 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+spec:
+  selector:
+    app: elasticsearch
+  clusterIP: None
+  ports:
+    - port: 9200
+      name: rest
+    - port: 9300
+      name: inter-node
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.14.0
+        resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 500m
+              memory: 1024Mi
+        ports:
+        - containerPort: 9200
+          name: rest
+          protocol: TCP
+        - containerPort: 9300
+          name: inter-node
+          protocol: TCP
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: plugins
+          mountPath: /usr/share/elasticsearch/plugins
+        - name: elasticsearch-cm
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+        - name: es-ca-secret
+          mountPath: /usr/share/elasticsearch/config/elastic-certificates.p12
+          readOnly: true
+          subPath: elastic-certificates.p12
+        env:
+          - name: cluster.name
+            value: es
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: discovery.zen.minimum_master_nodes # 含义请参阅官方 Elasticsearch 文档
+            value: "2"
+          - name: discovery.seed_hosts # 含义请参阅官方 Elasticsearch 文档
+            value: "elasticsearch-0.elasticsearch,elasticsearch-1.elasticsearch,elasticsearch-2.elasticsearch"
+          - name: cluster.initial_master_nodes # 初始化的 master 节点，旧版本相关配置 discovery.zen.minimum_master_nodes
+            value: "elasticsearch-0,elasticsearch-1,elasticsearch-2" # 含义请参阅官方 Elasticsearch 文档
+          - name: ES_JAVA_OPTS
+            value: "-Xms1g -Xmx1g" # 根据具体资源及需求调整
+          #- name: "xpack.security.enabled"
+          #  value: "true"
+          #- name: xpack.security.transport.ssl.enabled
+          #  value: "true"
+          #- name: xpack.security.transport.ssl.verification_mode
+          #  value: "certificate"
+          #- name: xpack.security.transport.ssl.keystore.path
+          #  value: "/usr/share/elasticsearch/config/elastic-certificates.p12"
+          #- name: xpack.security.transport.ssl.truststore.path
+          #  value: "/usr/share/elasticsearch/config/elastic-certificates.p12"
+          - name: ELASTIC_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: es-cd-secret
+                key: username
+          - name: ELASTIC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: es-cd-secret
+                key: password
+      initContainers:
+      - name: fix-permissions
+        image: busybox:1.32
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      - name: fix-permissions2
+        image: busybox:1.32
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/plugins"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: plugins
+          mountPath: /usr/share/elasticsearch/plugins
+      - name: fix-option
+        image: busybox:1.32
+        command: ["sh", "-c", "ulimit -n 65536 && sysctl -w vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
+      volumes:
+      - name: elasticsearch-cm
+        configMap:
+          name: elasticsearch-cm
+      - name: es-ca-secret
+        secret:
+          secretName: es-ca-secret
+          defaultMode: 0444
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: plugins
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: 1Gi

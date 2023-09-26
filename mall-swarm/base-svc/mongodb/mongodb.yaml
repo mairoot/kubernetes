@@ -1,0 +1,62 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    name: mongodb
+  name: mongodb
+spec:
+  type: NodePort
+  ports:
+  - name: mongodb
+    port: 27017
+    targetPort: 27017
+    nodePort: 30017
+  selector:
+    name: mongodb
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  serviceName: mongodb
+  selector:
+    matchLabels:
+      name: mongodb
+  template:
+    metadata:
+      labels:
+        name: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.2.1
+        command:
+        - sh
+        - -c
+        - "exec mongod -f /mongodb/conf/mongodb.conf"
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: "2000m"
+            memory: "2048Mi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 27017
+          name: mongodb
+          protocol: TCP
+        volumeMounts:
+        - name: mongodb-cm
+          mountPath: /mongodb/conf
+        - name: mongodb-claim
+          mountPath: /mongodb/data
+      volumes:
+      - name: mongodb-cm
+        configMap:
+          name: mongodb-cm
+      - name: mongodb-claim
+        persistentVolumeClaim:
+          claimName: mongodb-claim

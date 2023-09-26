@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  name: logstash
+spec:
+  ports:
+    - nodePort: 30544
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+      name: port-5044
+    - nodePort: 30560
+      port: 4560
+      protocol: TCP
+      targetPort: 4560
+      name: port-4560
+    - nodePort: 30561
+      port: 4561
+      protocol: TCP
+      targetPort: 4561
+      name: port-4561
+    - nodePort: 30562
+      port: 4562
+      protocol: TCP
+      targetPort: 4562
+      name: port-4562
+    - nodePort: 30563
+      port: 4563
+      protocol: TCP
+      targetPort: 4563
+      name: port-4563
+  selector:
+    app: logstash
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 10
+  name: logstash
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: logstash
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - image: 'docker.elastic.co/logstash/logstash:7.14.0'
+          imagePullPolicy: Always
+          name: logstash
+          ports:
+            - containerPort: 5044
+              protocol: TCP
+              name: port-5044
+            - containerPort: 4560
+              protocol: TCP
+              name: port-4560
+            - containerPort: 4561
+              protocol: TCP
+              name: port-4561
+            - containerPort: 4562
+              protocol: TCP
+              name: port-4562
+            - containerPort: 4563
+              protocol: TCP
+              name: port-4563
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /usr/share/logstash/pipeline/
+              name: logstash-cm
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: rep-secret
+      volumes:
+        - name: logstash-cm
+          configMap:
+            name: logstash-cm

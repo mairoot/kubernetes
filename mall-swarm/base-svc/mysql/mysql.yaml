@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    k8s.kuboard.cn/name: mysql
+  name: mysql
+  namespace: dev
+spec:
+  ports:
+    - name: ppdf4x
+      nodePort: 30006
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: mysql
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+          # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          # value: '123456'
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        resources:
+          limits:
+            cpu: "4000m"
+            memory: "4096Mi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        - name: mysql-logs-persistent-storage
+          mountPath: /var/lib/mysql-logs
+        - name: configmap
+          mountPath: /etc/my.cnf
+          subPath: my.cnf
+          readOnly: true
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-claim
+      - name: mysql-logs-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-logs-claim
+      - name: configmap
+        configMap:
+          name: mysql-cm
