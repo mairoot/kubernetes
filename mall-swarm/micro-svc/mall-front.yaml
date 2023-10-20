@@ -35,7 +35,7 @@ spec:
         app: mall-front
     spec:
       containers:
-        - image: 'registry.cn-shenzhen.aliyuncs.com/demo/mall-front:v6'
+        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-front:v7'
           imagePullPolicy: Always
           name: mall-front
           ports:

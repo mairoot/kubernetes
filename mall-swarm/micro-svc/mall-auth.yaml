@@ -21,7 +21,7 @@ spec:
         app: mall-auth
     spec:
       containers:
-        - image: 'registry.cn-shenzhen.aliyuncs.com/demo/mall-auth:v6'
+        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-auth:v7'
           imagePullPolicy: Always
           name: mall-auth
           ports:
@@ -51,7 +51,7 @@ spec:
             - '-c'
             - >-
               set -ex ; mkdir -p /skywalking/agent ; cp -r /skywalking-agent/* /skywalking/agent ;
-          image: 'registry.cn-shenzhen.aliyuncs.com/demo/skywalking-agent:9.0.0'
+          image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/skywalking-agent:9.0.0'
           imagePullPolicy: IfNotPresent
           name: init-skywalking-agent
           resources: {}
