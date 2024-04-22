@@ -53,16 +53,16 @@ spec:
       annotations:
         pod.alpha.kubernetes.io/initialized: "true"
     spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: "app"
-                    operator: In
-                    values:
-                      - nacos
-              topologyKey: "kubernetes.io/hostname"
+      #affinity:
+      #  podAntiAffinity:
+      #    requiredDuringSchedulingIgnoredDuringExecution:
+      #      - labelSelector:
+      #          matchExpressions:
+      #            - key: "app"
+      #              operator: In
+      #              values:
+      #                - nacos
+      #        topologyKey: "kubernetes.io/hostname"
       serviceAccountName: nfs-client-provisioner
       initContainers:
         - name: peer-finder-plugin-install

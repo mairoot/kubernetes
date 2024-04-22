@@ -29,7 +29,7 @@ spec:
             - name: PROVISIONER_NAME
               value: k8s-sigs.io/nfs-subdir-external-provisioner
             - name: NFS_SERVER
-              value: 10.0.2.3
+              value: master
             - name: NFS_PATH
               value: /data/apps/nfs/pub
           resources:

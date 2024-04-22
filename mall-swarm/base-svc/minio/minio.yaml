@@ -43,7 +43,7 @@ spec:
           - name: MINIO_ROOT_USER
             value: 'admin'
           - name: MINIO_ROOT_PASSWORD
-            value: '123456'
+            value: '12345678'
           image: quay.io/minio/minio:latest
           command:
           - /bin/bash

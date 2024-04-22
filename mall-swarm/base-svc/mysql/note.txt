@@ -1,0 +1,14 @@
+# 1.nacos
+# https://github.com/alibaba/nacos/blob/2.2.3/distribution/conf/mysql-schema.sql
+CREATE DATABASE `nacos` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+grant all ON nacos.* TO 'nacos'@'%' IDENTIFIED BY '123456';
+
+# 2.xxl_job
+# https://github.com/xuxueli/xxl-job/blob/v2.2.0/doc/db/tables_xxl_job.sql
+CREATE DATABASE `xxl_job` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+grant all ON xxl_job.* TO 'xxl_job'@'%' IDENTIFIED BY '123456';
+
+# 3.mall
+# https://github.com/macrozheng/mall-swarm/blob/master/document/sql/mall.sql
+CREATE DATABASE `mall` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+grant all ON mall.* TO 'mall'@'%' IDENTIFIED BY '123456';
