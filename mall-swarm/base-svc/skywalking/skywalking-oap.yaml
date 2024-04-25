@@ -77,7 +77,7 @@ spec:
         - name: SW_ES_USER
           value: elastic
         - name: SW_ES_PASSWORD
-          value: 123456
+          value: 'a123456'
         image: skywalking.docker.scarf.sh/apache/skywalking-oap-server:9.2.0
         imagePullPolicy: IfNotPresent
         livenessProbe:

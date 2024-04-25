@@ -22,7 +22,7 @@ kubectl create secret generic es-ca-pem-secret --from-file=elastic-certificate.p
 
 # 设置集群用户名密码，用户名不建议修改
 kubectl create secret generic es-cd-secret \
-  --from-literal=username=elastic --from-literal=password=123456
+  --from-literal=username=elastic --from-literal=password=a123456
 
 # 安装插件
 将插件(如ik)放到共享存储上面，然后重启ES。
