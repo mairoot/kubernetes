@@ -3,7 +3,14 @@ kind: ConfigMap
 metadata:
   name: logstash-cm
 data:
-  redis.conf: |-
+  logstash.yml: |-
+      http.host: 0.0.0.0
+      xpack.monitoring.enabled: true
+      xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+      xpack.monitoring.elasticsearch.username: "elastic"
+      xpack.monitoring.elasticsearch.password: "a123456"
+      path.config: "/usr/share/logstash/pipeline"
+  logstash.conf: |-
     input {
       tcp {
         mode => "server"
@@ -49,7 +56,9 @@ data:
     }
     output {
       elasticsearch {
-        hosts => "elasticsearch:9200"
+        hosts => "http://elasticsearch:9200"
         index => "mall-%{type}-%{+YYYY.MM.dd}"
+        user => "elastic"
+        password => "a123456"
       }
     }

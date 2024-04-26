@@ -60,6 +60,9 @@ spec:
         - image: 'docker.elastic.co/logstash/logstash:7.14.0'
           imagePullPolicy: Always
           name: logstash
+          env:
+            - name: "xpack.security.enabled"
+              value: "false"
           ports:
             - containerPort: 5044
               protocol: TCP
@@ -86,12 +89,16 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
-            - mountPath: /usr/share/logstash/pipeline/
-              name: logstash-cm
+            - name: logstash-cm
+              subPath: logstash.yml
+              mountPath: /usr/share/logstash/config/logstash.yml
+            - name: logstash-cm
+              subPath: logstash.conf
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
       dnsPolicy: ClusterFirst
       imagePullSecrets:
       - name: rep-secret
       volumes:
-        - name: logstash-cm
-          configMap:
-            name: logstash-cm
+      - name: logstash-cm
+        configMap:
+          name: logstash-cm

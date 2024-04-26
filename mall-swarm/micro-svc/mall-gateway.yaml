@@ -35,12 +35,17 @@ spec:
         app: mall-gateway
     spec:
       containers:
-        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-gateway:v7'
+        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-gateway:v8'
           imagePullPolicy: Always
           name: mall-gateway
           ports:
             - containerPort: 8201
               protocol: TCP
+          env:
+            - name: spring.profiles.active
+              value: prod
+            - name: TZ
+              value: Asia/Shanghai
           resources:
             limits:
               cpu: "2000m"

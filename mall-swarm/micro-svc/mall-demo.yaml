@@ -21,12 +21,17 @@ spec:
         app: mall-demo
     spec:
       containers:
-        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-demo:v7'
+        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-demo:v8'
           imagePullPolicy: Always
           name: mall-demo
           ports:
             - containerPort: 8080
               protocol: TCP
+          env:
+            - name: spring.profiles.active
+              value: prod
+            - name: TZ
+              value: Asia/Shanghai
           resources:
             limits:
               cpu: "2000m"

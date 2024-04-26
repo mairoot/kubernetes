@@ -21,12 +21,17 @@ spec:
         app: mall-auth
     spec:
       containers:
-        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-auth:v7'
+        - image: 'registry.cn-shenzhen.aliyuncs.com/ttprod/mall-auth:v8'
           imagePullPolicy: Always
           name: mall-auth
           ports:
             - containerPort: 8401
               protocol: TCP
+          env:
+            - name: spring.profiles.active
+              value: prod
+            - name: TZ
+              value: Asia/Shanghai
           resources:
             limits:
               cpu: "2000m"
