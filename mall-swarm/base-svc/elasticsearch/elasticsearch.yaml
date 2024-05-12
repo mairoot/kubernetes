@@ -31,7 +31,8 @@ spec:
     spec:
       containers:
       - name: elasticsearch
-        image: elasticsearch:7.14.0
+        #image: elasticsearch:7.14.0
+        image: registry.cn-shenzhen.aliyuncs.com/ttprod/elasticsearch:7.14.0
         resources:
             limits:
               cpu: 1000m
